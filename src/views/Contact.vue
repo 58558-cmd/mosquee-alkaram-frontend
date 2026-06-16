@@ -216,7 +216,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const API = "http://localhost:8080";
+const API = 'https://mosquee-alkaram-backend-production.up.railway.app'
 
 // Infos contact dynamiques (chargées depuis l'admin plus tard)
 const contactInfo = ref({ telephone: "", email: "" });

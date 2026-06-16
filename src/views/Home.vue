@@ -385,7 +385,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 
-const API = "http://localhost:8080";
+const API = 'https://mosquee-alkaram-backend-production.up.railway.app'
 
 const stats = ref({ totalCollecte: 0, objectif: 258000, pourcentage: 0 });
 const statsLoading = ref(true);

@@ -263,7 +263,7 @@ import { ref, computed, onMounted, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { loadStripe } from "@stripe/stripe-js";
 
-const API = "http://localhost:8080";
+const API = 'https://mosquee-alkaram-backend-production.up.railway.app'
 const route = useRoute();
 const router = useRouter();
 

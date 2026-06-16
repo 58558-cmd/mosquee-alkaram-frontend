@@ -184,7 +184,7 @@ function formatDate(d) {
 
 async function loadEvenements() {
   try {
-    const res = await fetch("http://localhost:8080/api/evenements/public");
+    const res = await fetch('https://mosquee-alkaram-backend-production.up.railway.app/api/evenements/public')
     if (res.ok) evenements.value = await res.json();
   } catch (e) {
     evenements.value = [];
