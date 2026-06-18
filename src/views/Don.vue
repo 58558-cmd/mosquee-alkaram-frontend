@@ -109,6 +109,10 @@
                   Mensuel
                 </button>
               </div>
+              <p v-if="freq === 'monthly'" class="freq-note">
+                💳 Le montant sera prélevé automatiquement chaque mois. Vous
+                pourrez annuler à tout moment en nous contactant.
+              </p>
             </div>
             <div class="form-section-title">Vos coordonnées</div>
             <div class="form-row">
@@ -190,6 +194,9 @@
               <span v-if="paying">
                 <span class="btn-spinner"></span> Traitement...
               </span>
+              <span v-else-if="paymentMode === 'subscription'"
+                >❤ Confirmer le don mensuel de {{ finalAmount }}€</span
+              >
               <span v-else>❤ Confirmer le don de {{ finalAmount }}€</span>
             </button>
 
@@ -263,7 +270,7 @@ import { ref, computed, onMounted, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { loadStripe } from "@stripe/stripe-js";
 
-const API = 'https://mosquee-alkaram-backend-production.up.railway.app'
+const API = "http://localhost:8080";
 const route = useRoute();
 const router = useRouter();
 
@@ -287,6 +294,7 @@ let elements = null;
 let paymentElement = null;
 let clientSecret = ref("");
 let currentDonId = ref(null);
+let paymentMode = ref("payment");
 
 const finalAmount = computed(
   () => chosen.value || parseInt(customAmt.value) || 0,
@@ -374,9 +382,10 @@ async function goToPayment() {
     if (data.clientSecret) {
       clientSecret.value = data.clientSecret;
       currentDonId.value = data.donId;
+      paymentMode.value = data.mode || "payment";
       step.value = 2;
       await nextTick();
-      await initPaymentElement(data.clientSecret, data.publicKey);
+      await initPaymentElement(data.clientSecret, data.publicKey, data.mode);
     } else {
       errorMsg.value = data.erreur || "Erreur lors de la création du paiement.";
     }
@@ -387,7 +396,7 @@ async function goToPayment() {
   }
 }
 
-async function initPaymentElement(secret, publicKey) {
+async function initPaymentElement(secret, publicKey, mode) {
   elementLoading.value = true;
   try {
     if (!stripe) {
@@ -446,6 +455,8 @@ async function initPaymentElement(secret, publicKey) {
       locale: "fr",
     });
 
+    // En mode abonnement, certaines méthodes (Bancontact, etc.) ne supportent pas
+    // toujours les paiements récurrents — Stripe filtre automatiquement les options compatibles.
     paymentElement = elements.create("payment", {
       layout: { type: "tabs", defaultCollapsed: false },
       wallets: { applePay: "auto", googlePay: "auto" },
@@ -487,19 +498,31 @@ async function confirmPayment() {
     }
 
     if (paymentIntent?.status === "succeeded") {
-      // Confirmer côté backend et mettre à jour la cagnotte
-      await fetch(`${API}/api/stripe/confirm-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentIntentId: paymentIntent.id,
-          donId: currentDonId.value,
-        }),
-      });
-      router.push({
-        path: "/success",
-        query: { montant: finalAmount.value, don_id: currentDonId.value },
-      });
+      if (paymentMode.value === "subscription") {
+        // Le webhook Stripe (invoice.payment_succeeded) confirmera et créditera la cagnotte
+        router.push({
+          path: "/success",
+          query: {
+            montant: finalAmount.value,
+            don_id: currentDonId.value,
+            mensuel: "1",
+          },
+        });
+      } else {
+        // Confirmer côté backend et mettre à jour la cagnotte
+        await fetch(`${API}/api/stripe/confirm-payment`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            paymentIntentId: paymentIntent.id,
+            donId: currentDonId.value,
+          }),
+        });
+        router.push({
+          path: "/success",
+          query: { montant: finalAmount.value, don_id: currentDonId.value },
+        });
+      }
     }
   } catch (e) {
     payError.value = "Une erreur est survenue. Veuillez réessayer.";
@@ -769,6 +792,15 @@ input:focus {
   background: var(--emerald);
   border-color: var(--emerald);
   color: var(--white);
+}
+.freq-note {
+  font-size: 0.82rem;
+  color: var(--gold-dark);
+  background: rgba(201, 168, 76, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.85rem;
+  margin-top: 0.6rem;
+  line-height: 1.5;
 }
 .form-row {
   display: grid;
