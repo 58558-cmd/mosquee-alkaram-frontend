@@ -171,6 +171,7 @@ const prayersError = ref(false);
 const todayLabel = ref("");
 const evenements = ref([]);
 const eventsLoading = ref(true);
+const jumuahTime = ref("13h00");
 
 function formatDate(d) {
   if (!d) return "";
@@ -184,7 +185,9 @@ function formatDate(d) {
 
 async function loadEvenements() {
   try {
-    const res = await fetch('https://mosquee-alkaram-backend-production.up.railway.app/api/evenements/public')
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/evenements/public`,
+    );
     if (res.ok) evenements.value = await res.json();
   } catch (e) {
     evenements.value = [];
@@ -262,13 +265,26 @@ const activities = [
     desc: "Khutbah et prière du vendredi chaque semaine. Un moment fort de rassemblement et de spiritualité pour toute la communauté.",
     status: "active",
     statusLabel: "Hebdomadaire",
-    schedule: ["Chaque vendredi à 13h00"],
+    schedule: [`Chaque vendredi à ${jumuahTime.value}`],
   },
 ];
+
+async function loadJumuah() {
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/config/contact`,
+    );
+    if (res.ok) {
+      const data = await res.json();
+      jumuahTime.value = data.jumuahTime || "13h00";
+    }
+  } catch {}
+}
 
 onMounted(() => {
   loadPrayerTimes();
   loadEvenements();
+  loadJumuah();
 });
 </script>
 

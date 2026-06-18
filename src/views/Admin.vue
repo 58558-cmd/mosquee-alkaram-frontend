@@ -406,7 +406,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 
-const API = 'https://mosquee-alkaram-backend-production.up.railway.app'
+const API = import.meta.env.VITE_API_URL;
 const isLoggedIn = ref(false);
 const loginForm = ref({ username: "", password: "" });
 const loginError = ref("");

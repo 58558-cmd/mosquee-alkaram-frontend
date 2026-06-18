@@ -96,7 +96,7 @@
               rel="noopener"
               class="map-link"
             >
-              Ouvrir dans Google Maps →
+              📍 Ouvrir dans Google Maps →
             </a>
           </div>
 
@@ -150,7 +150,8 @@
               <option value="">Choisir un sujet...</option>
               <option value="info">Informations générales</option>
               <option value="cours">Inscription aux cours</option>
-              <option value="don">Don & prêt</option>
+              <option value="don">Don & partenariat</option>
+              <option value="evenement">Événements</option>
               <option value="autre">Autre</option>
             </select>
           </div>
@@ -216,7 +217,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const API = 'https://mosquee-alkaram-backend-production.up.railway.app'
+const API = import.meta.env.VITE_API_URL;
 
 // Infos contact dynamiques (chargées depuis l'admin plus tard)
 const contactInfo = ref({ telephone: "", email: "" });
@@ -287,8 +288,16 @@ const faqs = [
     a: "Vous pouvez prendre le tram 82 (arrêt Saint-Denis ou Max-Waller) ou les bus 50, 54 et 74 (arrêt Saint-Denis).",
   },
   {
+    q: "La mosquée est-elle accessible aux non-musulmans ?",
+    a: "Oui, notre mosquée est ouverte à toute personne souhaitant apprendre ou découvrir l'Islam dans le respect mutuel. N'hésitez pas à nous contacter pour organiser une visite.",
+  },
+  {
     q: "Comment inscrire mon enfant aux cours d'arabe ?",
     a: "Les cours d'arabe pour enfants ont lieu le samedi et dimanche de 10h à 14h. Contactez-nous par le formulaire ci-contre ou venez directement à la mosquée pour vous inscrire.",
+  },
+  {
+    q: "Mon don est-il déductible fiscalement ?",
+    a: "En Belgique, les dons de 40€ ou plus à des associations reconnues peuvent donner droit à un avantage fiscal de 45%. Nous vous fournirons les documents nécessaires sur demande.",
   },
   {
     q: "Comment suivre l'avancement du projet d'agrandissement ?",
